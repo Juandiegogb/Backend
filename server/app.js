@@ -3,7 +3,10 @@ import morgan from "morgan";
 
 const app = express();
 
+
+
 app.use(express.json());
+app.use(express.static("dist"));
 
 app.listen(3000, () => {
   console.log("Server ready");
@@ -102,7 +105,7 @@ app.put("/test", (req, res) => {
   console.log(req.body);
 });
 
-const unknownEndpoint = (request, response) => {
-  response.status(404).send({ error: "unknown endpoint" });
-};
-app.use(unknownEndpoint);
+// const unknownEndpoint = (request, response) => {
+//   response.status(404).send({ error: "unknown endpoint" });
+// };
+// app.use(unknownEndpoint);

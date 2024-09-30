@@ -2,20 +2,13 @@
   "name": "backagendatelefonica",
   "version": "1.0.0",
   "main": "index.js",
-  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon app.js",
-    "start": "node app.js"
+    "build": " rm -rf server/dist && cd agendaTelefonica/ && npm run build && mv dist/ ../server/",
+    "dev": "nodemon ./server/app.js",
+    "deploy": "git add . && git commit -m deployPipeline && git push origin main && echo Deployed"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "express": "^4.21.0"
-  },
-  "devDependencies": {
-    "morgan": "^1.10.0"
-  }
+  "description": ""
 }
