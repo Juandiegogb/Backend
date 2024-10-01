@@ -12,7 +12,7 @@ content-type: application/json
 GET http://localhost:3000/api/persons
 
 ####
-PUT http://localhost:3000/test
+PUT http://localhost:3001/api/persons/66faf4576c8b700aa6318c9a
 content-type: application/json
 
 {

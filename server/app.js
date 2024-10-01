@@ -1,107 +1,116 @@
 import express from "express";
+import morgan from "morgan";
+import dotenv from "dotenv";
+import cors from "cors";
+import { dbConnect } from "./db.js";
+import contactModel from "./src/models/contactModel.js";
+dotenv.config({ path: "./src/.env" });
 
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(express.static("./dist"));
+dbConnect();
 
-app.listen(8000);
+morgan.token("body", function (req, res) {
+  return req.method === "POST" ? JSON.stringify(req.body) : "";
+});
 
+app.use(
+  morgan(function (tokens, req, res) {
+    return [
+      tokens.method(req, res),
+      tokens.url(req, res),
+      tokens.status(req, res),
+      tokens.res(req, res, "content-length"),
+      "-",
+      tokens["response-time"](req, res),
+      "ms",
+      tokens.body(req, res),
+    ].join(" ");
+  })
+);
 
-// morgan.token("body", function (req, res) {
-//   return req.method === "POST" ? JSON.stringify(req.body) : "";
-// });
+app.get("/api/persons", (req, res, next) => {
+  contactModel
+    .find()
+    .then((result) => {
+      res.json(result);
+    })
+    .catch((error) => next(error));
+});
 
-// app.use(
-//   morgan(function (tokens, req, res) {
-//     return [
-//       tokens.method(req, res),
-//       tokens.url(req, res),
-//       tokens.status(req, res),
-//       tokens.res(req, res, "content-length"),
-//       "-",
-//       tokens["response-time"](req, res),
-//       "ms",
-//       tokens.body(req, res),
-//     ].join(" ");
-//   })
-// );
+app.get("/api/info", (req, res, next) => {
+  contactModel.countDocuments().then((result) => {
+    const fecha = new Date();
+    res.json(
+      `Tenemos ${result} registros en la base de datos a fecha y hora de ${fecha.toString()}`
+    );
+  });
+});
 
-// let db = [
-//   {
-//     id: 1,
-//     name: "Arto Hellas",
-//     number: "040-123456",
-//   },
-//   {
-//     id: 2,
-//     name: "Ada Lovelace",
-//     number: "39-44-5323523",
-//   },
-//   {
-//     id: 3,
-//     name: "Dan Abramov",
-//     number: "12-43-234345",
-//   },
-//   {
-//     id: 4,
-//     name: "Mary Poppendieck",
-//     number: "39-23-6423122",
-//   },
-// ];
+app.get("/api/persons/:id", (req, res, next) => {
+  const id = req.params.id;
+  contactModel
+    .findById(id)
+    .then((result) => {
+      result
+        ? res.json(result)
+        : res.status(400).send({ message: "invalid id" });
+    })
+    .catch((error) => next(error));
+});
 
-// app.get("/api/persons", (req, res) => {
-//   res.json(db);
-// });
+app.delete("/api/persons/:id", (req, res, next) => {
+  const id = req.params.id;
+  contactModel
+    .findByIdAndDelete(id)
+    .then(() => res.status(204).end())
+    .catch((error) => next(error));
+});
 
-// app.get("/api/persons/:id", (req, res) => {
-//   const id = Number(req.params.id);
-//   const person = db.find((person) => person.id === id);
-//   if (person) {
-//     res.json(person);
-//   } else {
-//     res.status(404).end();
-//   }
-// });
+app.post("/api/persons", (req, res, next) => {
+  if (req.body.name && req.body.number) {
+    contactModel
+      .create({ name: req.body.name, number: req.body.number })
+      .then(() => {
+        res.status(204).end();
+      })
+      .catch((error) => next(error));
+  } else {
+    res.status(400).end();
+  }
+});
 
-// app.get("/info", (req, res) => {
-//   const date = new Date();
-//   res.send(`The phonebook has ${db.length} registers at ${date}`);
-// });
+app.put("/api/persons/:id", (req, res) => {
+  const id = req.params.id;
+  contactModel
+    .findByIdAndUpdate(id, req.body)
+    .then((result) => {
+      res.status(204).end();
+    })
+    .catch((error) => next());
+});
 
-// app.delete("/api/persons/:id", (req, res) => {
-//   const id = Number(req.params.id);
-//   const personToDelete = db.find((person) => person.id === id);
-//   if (personToDelete) {
-//     db = db.filter((person) => person.id !== id);
-//     res.status(204).end();
-//   } else {
-//     res.status(404).end();
-//   }
-// });
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
-// app.post("/api/persons", (req, res) => {
-//   if (req.body.name && req.body.number) {
-//     const newName = req.body.name.toLowerCase();
-//     const nameExist = db.some((person) =>
-//       person.name.toLowerCase().includes(newName)
-//     );
-//     if (nameExist) {
-//       return res.status(400).json({ message: "Name alredy in db" });
-//     }
-//     req.body.id = Math.max(...db.map((person) => person.id)) + 1;
-//     db.push(req.body);
-//     res.status(200).end();
-//   } else {
-//     res.status(400).end();
-//   }
-// });
+const errorsHandler = (error, req, res, next) => {
+  console.error(error.message);
+  if (error.name === "CastError") {
+    return res.status(400).send({ error: "malformatted id" });
+  } else if (error.name) {
+    console.log("holiii");
+  }
+};
 
-// app.put("/test", (req, res) => {
-//   console.log(req.body);
-// });
+app.use(errorsHandler);
 
-// // const unknownEndpoint = (request, response) => {
-// //   response.status(404).send({ error: "unknown endpoint" });
-// // };
-// // app.use(unknownEndpoint);
+const unknownEndpoint = (request, response) => {
+  response.status(404).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);

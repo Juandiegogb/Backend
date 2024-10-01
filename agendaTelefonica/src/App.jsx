@@ -4,7 +4,7 @@ import personsService from "./services/personsService";
 const App = () => {
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
-  const [newPhone, setNewPhone] = useState(null);
+  const [newnumber, setNewnumber] = useState(null);
   const [toShow, setToShow] = useState(null);
   const [message, setMessage] = useState(null);
 
@@ -21,7 +21,7 @@ const App = () => {
   }, [message]);
 
   const nameHandle = (e) => setNewName(e.target.value);
-  const phoneHandle = (e) => setNewPhone(e.target.value);
+  const numberHandle = (e) => setNewnumber(e.target.value);
   const searchHandle = (e) => {
     setToShow(
       persons.filter((person) =>
@@ -40,7 +40,7 @@ const App = () => {
       if (confirm("Desea modificar el numero del contacto existente ?")) {
         const id = persons[index].id;
         const body = persons[index];
-        body.phone = newPhone;
+        body.number = newnumber;
         personsService.update(id, body);
         setMessage({
           message: "Usuario modificado con exito ",
@@ -48,9 +48,9 @@ const App = () => {
         });
       }
     } else {
-      personsService.create({ name: newName, phone: newPhone });
+      personsService.create({ name: newName, number: newnumber });
       setNewName(null);
-      setNewPhone(null);
+      setNewnumber(null);
       setMessage({ message: "Contacto creado con exito", color: "green" });
       e.target.reset();
     }
@@ -88,7 +88,7 @@ const App = () => {
       <CreateForm
         handleSubmit={handleSubmit}
         nameHandle={nameHandle}
-        phoneHandle={phoneHandle}
+        numberHandle={numberHandle}
       />
       <h1>Contacts</h1>
       {toShow ? (
@@ -100,7 +100,7 @@ const App = () => {
   );
 };
 
-const CreateForm = ({ handleSubmit, nameHandle, phoneHandle }) => {
+const CreateForm = ({ handleSubmit, nameHandle, numberHandle }) => {
   return (
     <form onSubmit={handleSubmit}>
       <input
@@ -112,10 +112,10 @@ const CreateForm = ({ handleSubmit, nameHandle, phoneHandle }) => {
       />
       <input
         required
-        name="phone"
+        name="number"
         type="text"
-        placeholder="Phone"
-        onChange={phoneHandle}
+        placeholder="number"
+        onChange={numberHandle}
       />
       <button type="submit">Create</button>
     </form>
@@ -140,7 +140,7 @@ const Person = ({ person, onDelete }) => {
   return (
     <div>
       <p>
-        <strong>{person.name}</strong> {person.phone}
+        <strong>{person.name}</strong> {person.number}
         <button
           onClick={() => {
             onDelete(person.id);
