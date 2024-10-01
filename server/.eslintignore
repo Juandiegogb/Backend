@@ -1,0 +1,7 @@
+# Ignorar la carpeta dist
+dist/
+
+# También podrías ignorar otras carpetas o archivos si es necesario:
+node_modules/
+build/
+.env
