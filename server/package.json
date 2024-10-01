@@ -9,9 +9,6 @@
     "start": "node app.js",
     "lint": "eslint ."
   },
-  "eslintIgnore": [
-    "dist/"
-  ],
   "keywords": [],
   "author": "",
   "license": "ISC",

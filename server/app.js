@@ -13,7 +13,7 @@ app.use(express.json());
 app.use(express.static("./dist"));
 dbConnect();
 
-morgan.token("body", function (req) {
+morgan.token("body", function (req, res) {
   return req.method === "POST" ? JSON.stringify(req.body) : "";
 });
 
@@ -32,7 +32,7 @@ app.use(
   })
 );
 
-app.get("/api/persons", (_, res, next) => {
+app.get("/api/persons", (req, res, next) => {
   contactModel
     .find()
     .then((result) => {
@@ -41,7 +41,7 @@ app.get("/api/persons", (_, res, next) => {
     .catch((error) => next(error));
 });
 
-app.get("/api/info", (_, res) => {
+app.get("/api/info", (req, res, next) => {
   contactModel.countDocuments().then((result) => {
     const fecha = new Date();
     res.json(
@@ -83,14 +83,14 @@ app.post("/api/persons", (req, res, next) => {
   }
 });
 
-app.put("/api/persons/:id", (req, res, next) => {
+app.put("/api/persons/:id", (req, res) => {
   const id = req.params.id;
   contactModel
     .findByIdAndUpdate(id, req.body)
-    .then(() => {
+    .then((result) => {
       res.status(204).end();
     })
-    .catch((error) => next(error));
+    .catch((error) => next());
 });
 
 const PORT = process.env.PORT || 3001;
@@ -98,8 +98,8 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-const errorsHandler = (error, _, res) => {
-  console.error(error.message, error.name);
+const errorsHandler = (error, req, res, next) => {
+  console.error(error.name);
   if (error.name === "CastError") {
     return res.status(400).send({ error: "malformatted id" });
   } else if (error.name === "ValidationError") {
