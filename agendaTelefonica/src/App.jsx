@@ -41,17 +41,41 @@ const App = () => {
         const id = persons[index].id;
         const body = persons[index];
         body.number = newnumber;
-        personsService.update(id, body);
-        setMessage({
-          message: "Usuario modificado con exito ",
-          color: "green",
-        });
+        personsService
+          .update(id, body)
+          .then((res) => {
+            console.log(res);
+            setMessage({
+              message: "Usuario modificado con exito ",
+              color: "green",
+            });
+          })
+          .catch((error) => {
+            console.log("hola");
+            setMessage({
+              message: "Error modificando el usuario. Inténtalo de nuevo.",
+              color: "red",
+            });
+          });
       }
     } else {
-      personsService.create({ name: newName, number: newnumber });
+      personsService
+        .create({ name: newName, number: newnumber })
+        .then((res) => {
+          console.log(res);
+          setMessage({
+            message: "Usuario modificado con exito ",
+            color: "green",
+          });
+        })
+        .catch((error) => {
+          setMessage({
+            message: error.response.data.error,
+            color: "red",
+          });
+        });
       setNewName(null);
       setNewnumber(null);
-      setMessage({ message: "Contacto creado con exito", color: "green" });
       e.target.reset();
     }
   };

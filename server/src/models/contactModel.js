@@ -1,8 +1,17 @@
 import mongoose from "mongoose";
 
 const contactSchema = new mongoose.Schema({
-  name: { type: String, required: true, minlength: 6 },
-  number: { type: String, required: true, minlength: 8 },
+  name: { type: String, required: true, minlength: 3 },
+  number: {
+    type: String,
+    required: true,
+    validate: {
+      validator: function (v) {
+        return /^\d{2,3}-\d/.test(v);
+      },
+      message: (props) => `${props.value} is not a valid phone number!`,
+    },
+  },
 });
 
 contactSchema.set("toJSON", {

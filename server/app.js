@@ -79,7 +79,7 @@ app.post("/api/persons", (req, res, next) => {
       })
       .catch((error) => next(error));
   } else {
-    res.status(400).end();
+    res.status(404).end();
   }
 });
 
@@ -99,11 +99,13 @@ app.listen(PORT, () => {
 });
 
 const errorsHandler = (error, req, res, next) => {
-  console.error(error.message);
+  console.error(error.message, error.name);
   if (error.name === "CastError") {
     return res.status(400).send({ error: "malformatted id" });
-  } else if (error.name) {
-    console.log("holiii");
+  } else if (error.name === "ValidationError") {
+    return res.status(400).send({ error: error.message });
+  } else {
+    return res.status(500).send({ error: "something went wrong" });
   }
 };
 
